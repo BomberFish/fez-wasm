@@ -1,0 +1,11 @@
+# Object files and libraries
+bin
+obj
+statics
+wwwroot/data.js
+
+# macOS bullshit
+.DS_Store
+
+# Prevent Polytron from killing me
+Content

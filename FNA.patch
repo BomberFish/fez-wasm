@@ -1,0 +1,329 @@
+diff --git a/lib/FAudio b/lib/FAudio
+index b2bf5b3..707114a 160000
+--- a/lib/FAudio
++++ b/lib/FAudio
+@@ -1 +1 @@
+-Subproject commit b2bf5b385bb0719f6afc12fd3636be14280f4fbb
++Subproject commit 707114aef2907793644d4067a6e7b09b51502ca9
+diff --git a/lib/FNA3D b/lib/FNA3D
+index 2a6f858..41b6ee7 160000
+--- a/lib/FNA3D
++++ b/lib/FNA3D
+@@ -1 +1 @@
+-Subproject commit 2a6f8586c8d032da18f707eb340bfbef26d1ff8b
++Subproject commit 41b6ee70ed962c3751d3b8145b1f520bfa885b04
+diff --git a/lib/SDL2-CS b/lib/SDL2-CS
+index 1ef072a..1eb20e5 160000
+--- a/lib/SDL2-CS
++++ b/lib/SDL2-CS
+@@ -1 +1 @@
+-Subproject commit 1ef072adb1653d3e79fa99586ebcb1797a54caca
++Subproject commit 1eb20e5c690aee9a5188ba9cf06207295c51d935
+diff --git a/lib/Theorafile b/lib/Theorafile
+index 48d74af..8beca3e 160000
+--- a/lib/Theorafile
++++ b/lib/Theorafile
+@@ -1 +1 @@
+-Subproject commit 48d74afcbf838fe95ca56cec142efae07bb56f65
++Subproject commit 8beca3e4a0748d37daea2d23222a3e289e476afb
+diff --git a/src/Content/ContentManager.cs b/src/Content/ContentManager.cs
+index da3490e..d9a14b8 100644
+--- a/src/Content/ContentManager.cs
++++ b/src/Content/ContentManager.cs
+@@ -111,6 +111,7 @@ namespace Microsoft.Xna.Framework.Content
+ 		{
+ 			if (serviceProvider == null)
+ 			{
++				Console.Error.WriteLine("ContentManager - serviceProvider");
+ 				throw new ArgumentNullException("serviceProvider");
+ 			}
+ 			ServiceProvider = serviceProvider;
+@@ -122,10 +123,12 @@ namespace Microsoft.Xna.Framework.Content
+ 		{
+ 			if (serviceProvider == null)
+ 			{
++				Console.Error.WriteLine("ContentManager - serviceProvider");
+ 				throw new ArgumentNullException("serviceProvider");
+ 			}
+ 			if (rootDirectory == null)
+ 			{
++				Console.Error.WriteLine("ContentManager - rootDirectory");
+ 				throw new ArgumentNullException("rootDirectory");
+ 			}
+ 			ServiceProvider = serviceProvider;
+@@ -191,6 +194,7 @@ namespace Microsoft.Xna.Framework.Content
+ 		{
+ 			if (string.IsNullOrEmpty(assetName))
+ 			{
++				Console.Error.WriteLine("Load - assetName");
+ 				throw new ArgumentNullException("assetName");
+ 			}
+ 			if (disposed)
+@@ -270,6 +274,7 @@ namespace Microsoft.Xna.Framework.Content
+ 		{
+ 			if (string.IsNullOrEmpty(assetName))
+ 			{
++				Console.Error.WriteLine("ReadAsset - assetName");
+ 				throw new ArgumentNullException("assetName");
+ 			}
+ 			if (disposed)
+diff --git a/src/Content/ContentReader.cs b/src/Content/ContentReader.cs
+index 11d9138..a737274 100644
+--- a/src/Content/ContentReader.cs
++++ b/src/Content/ContentReader.cs
+@@ -139,11 +139,16 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		public T ReadObject<T>()
+ 		{
++			Console.WriteLine("Reading object of type " + typeof(T).Name);
+ 			return ReadObject(default(T));
+ 		}
+ 
+ 		public T ReadObject<T>(ContentTypeReader typeReader)
+ 		{
++			Console.WriteLine("ReadObject: Reading object of type " + typeof(T).Name);
++			Console.WriteLine("a");
++			Console.WriteLine("ReadObject: Reading object with type reader " + typeReader);
++			Console.WriteLine(typeReader == null);
+ 			T result = (T) typeReader.Read(this, default(T));
+ 			RecordDisposable(result);
+ 			return result;
+@@ -151,6 +156,7 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		public T ReadObject<T>(T existingInstance)
+ 		{
++			Console.WriteLine("Reading object of type " + typeof(T).Name);
+ 			return InnerReadObject(existingInstance);
+ 		}
+ 
+@@ -327,9 +333,12 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		private T InnerReadObject<T>(T existingInstance)
+ 		{
++			Console.WriteLine("Reading object of type " + typeof(T).Name);
+ 			int typeReaderIndex = Read7BitEncodedInt();
++			Console.WriteLine("Past type reader index");
+ 			if (typeReaderIndex == 0)
+ 			{
++				Console.WriteLine("Type reader index is 0");
+ 				return existingInstance;
+ 			}
+ 			if (typeReaderIndex > typeReaders.Length)
+@@ -338,9 +347,13 @@ namespace Microsoft.Xna.Framework.Content
+ 					"Incorrect type reader index found!"
+ 				);
+ 			}
++			Console.WriteLine("Reading object with type reader index " + typeReaderIndex);
+ 			ContentTypeReader typeReader = typeReaders[typeReaderIndex - 1];
++			Console.WriteLine("Past type reader assignment");
+ 			T result = (T) typeReader.Read(this, default(T));
++			Console.WriteLine("Past type reader read");
+ 			RecordDisposable(result);
++			Console.WriteLine("Past disposable record");
+ 			return result;
+ 		}
+ 
+diff --git a/src/Content/ContentReaders/ArrayReader.cs b/src/Content/ContentReaders/ArrayReader.cs
+index e4762b7..ca184f5 100644
+--- a/src/Content/ContentReaders/ArrayReader.cs
++++ b/src/Content/ContentReaders/ArrayReader.cs
+@@ -17,7 +17,7 @@ using System;
+ 
+ namespace Microsoft.Xna.Framework.Content
+ {
+-	internal class ArrayReader<T> : ContentTypeReader<T[]>
++	public class ArrayReader<T> : ContentTypeReader<T[]>
+ 	{
+ 		#region Private ContentTypeReader Instance
+ 
+@@ -47,15 +47,19 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		protected internal override T[] Read(ContentReader input, T[] existingInstance)
+ 		{
++			Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) called.");
+ 			uint count = input.ReadUInt32();
+ 			T[] array = existingInstance;
+ 			if (array == null)
+ 			{
++				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Allocating new array.");
+ 				array = new T[count];
++				Console.WriteLine(array);
+ 			}
+ 
+ 			if (typeof(T).IsValueType)
+ 			{
++				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading value type array.");
+ 				for (uint i = 0; i < count; i += 1)
+ 				{
+ 					array[i] = input.ReadObject<T>(elementReader);
+@@ -63,8 +67,10 @@ namespace Microsoft.Xna.Framework.Content
+ 			}
+ 			else
+ 			{
++				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading reference type array.");
+ 				for (uint i = 0; i < count; i += 1)
+ 				{
++					Console.WriteLine(i + "/" + count);
+ 					int readerType = input.Read7BitEncodedInt();
+ 					if (readerType > 0)
+ 					{
+diff --git a/src/Content/ContentReaders/DictionaryReader.cs b/src/Content/ContentReaders/DictionaryReader.cs
+index 8325826..2fd7ca1 100644
+--- a/src/Content/ContentReaders/DictionaryReader.cs
++++ b/src/Content/ContentReaders/DictionaryReader.cs
+@@ -14,7 +14,7 @@ using System.Collections.Generic;
+ 
+ namespace Microsoft.Xna.Framework.Content
+ {
+-	internal class DictionaryReader<TKey, TValue> : ContentTypeReader<Dictionary<TKey, TValue>>
++	public class DictionaryReader<TKey, TValue> : ContentTypeReader<Dictionary<TKey, TValue>>
+ 	{
+ 		#region Public Properties
+ 
+diff --git a/src/Content/ContentReaders/EnumReader.cs b/src/Content/ContentReaders/EnumReader.cs
+index b06e014..1823924 100644
+--- a/src/Content/ContentReaders/EnumReader.cs
++++ b/src/Content/ContentReaders/EnumReader.cs
+@@ -13,7 +13,7 @@ using System;
+ 
+ namespace Microsoft.Xna.Framework.Content
+ {
+-	internal class EnumReader<T> : ContentTypeReader<T>
++	public class EnumReader<T> : ContentTypeReader<T>
+ 	{
+ 		#region Private ContentTypeReader Instance
+ 
+@@ -43,6 +43,7 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		protected internal override T Read(ContentReader input, T existingInstance)
+ 		{
++			Console.WriteLine("EnumReader<T>.Read(ContentReader, T) called.");
+ 			return input.ReadRawObject<T>(elementReader);
+ 		}
+ 
+diff --git a/src/Content/ContentReaders/ListReader.cs b/src/Content/ContentReaders/ListReader.cs
+index 3760786..eb586e7 100644
+--- a/src/Content/ContentReaders/ListReader.cs
++++ b/src/Content/ContentReaders/ListReader.cs
+@@ -18,7 +18,7 @@ using System.Collections.Generic;
+ 
+ namespace Microsoft.Xna.Framework.Content
+ {
+-	internal class ListReader<T> : ContentTypeReader<List<T>>
++	public class ListReader<T> : ContentTypeReader<List<T>>
+ 	{
+ 		#region Public Properties
+ 
+diff --git a/src/Content/ContentTypeReader.cs b/src/Content/ContentTypeReader.cs
+index 2e1aa94..cbfa525 100644
+--- a/src/Content/ContentTypeReader.cs
++++ b/src/Content/ContentTypeReader.cs
+@@ -102,12 +102,16 @@ namespace Microsoft.Xna.Framework.Content
+ 		/// </param>
+ 		protected internal override object Read(ContentReader input, object existingInstance)
+ 		{
++			Console.WriteLine("Reading object of type " + typeof(T).Name);
++			Console.WriteLine("Read() " + input + existingInstance);
+ 			if (existingInstance == null)
+ 			{
++				Console.WriteLine("Existing instance is null");
+ 				return this.Read(input, default(T));
+ 			}
+ 			else
+ 			{
++				Console.WriteLine("Existing instance is not null");
+ 				return this.Read(input, (T) existingInstance);
+ 			}
+ 		}
+diff --git a/src/Content/ContentTypeReaderManager.cs b/src/Content/ContentTypeReaderManager.cs
+index ffa306e..180dde8 100644
+--- a/src/Content/ContentTypeReaderManager.cs
++++ b/src/Content/ContentTypeReaderManager.cs
+@@ -48,6 +48,8 @@ namespace Microsoft.Xna.Framework.Content
+ 		private static Dictionary<string, Func<ContentTypeReader>> typeCreators =
+ 			new Dictionary<string, Func<ContentTypeReader>>();
+ 
++		private static Dictionary<String, Type> customTypes = new Dictionary<String, Type>();
++
+ 		#endregion
+ 
+ 		#region Private Static Constructor
+@@ -71,6 +73,11 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		#region Public Methods
+ 
++		public static void AddCustomTypeReader(string readerTypeString, Type readerType)
++		{
++			customTypes.Add(readerTypeString, readerType);
++		}
++
+ 		public ContentTypeReader GetTypeReader(Type targetType)
+ 		{
+ 			ContentTypeReader reader;
+@@ -183,19 +190,62 @@ namespace Microsoft.Xna.Framework.Content
+ 					 */
+ 					string originalReaderTypeString = reader.ReadString();
+ 
++					// Need to resolve namespace differences
++					string readerTypeString = originalReaderTypeString;
++					readerTypeString = PrepareType(readerTypeString);
++
+ 					Func<ContentTypeReader> readerFunc;
+ 					if (typeCreators.TryGetValue(originalReaderTypeString, out readerFunc))
+ 					{
+ 						newReaders[i] = readerFunc();
+ 						needsInitialize[i] = true;
+ 					}
++					else if (customTypes.TryGetValue(readerTypeString, out Type customType))
++					{
++						newReaders[i] = customType.GetDefaultConstructor().Invoke(null) as ContentTypeReader;
++					}
+ 					else
+ 					{
+-						// Need to resolve namespace differences
+-						string readerTypeString = originalReaderTypeString;
+-						readerTypeString = PrepareType(readerTypeString);
+-
++						Console.WriteLine("Original Reader Type: " + originalReaderTypeString);
++						Console.WriteLine("Reader Type: " + readerTypeString);
+ 						Type l_readerType = Type.GetType(readerTypeString);
++						if (l_readerType == null)
++						{
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ListReader`1[[System.Char, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ListReader<System.Char>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ListReader`1[[System.Int32, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ListReader<System.Int32>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ListReader`1[[System.String, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ListReader<System.String>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.DictionaryReader`2[[System.String, mscorlib],[System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.String, mscorlib]], mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.DictionaryReader<System.String, System.Collections.Generic.Dictionary<System.String, System.String>>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.DictionaryReader`2[[System.String, mscorlib],[System.String, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.DictionaryReader<System.String, System.String>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.String, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.String>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Int32, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Int32>);
++							}
++						}
+ 						if (l_readerType != null)
+ 						{
+ 							ContentTypeReader typeReader;
