@@ -6,11 +6,11 @@ Please don't kill me, Polytron.
 
 ## What works
 
-- The game starts up and gets to the loading screen.
+- The game starts up, displays developer credits, and gets to the title screen.
 
 ## What doesn't work
 
-- The game crashes when advancing past the developer logos.
+- The game crashes when attempting to go past the title screen.
 
 ## Building
 

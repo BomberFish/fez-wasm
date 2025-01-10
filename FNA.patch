@@ -191,7 +191,7 @@ index 8325826..2fd7ca1 100644
  		#region Public Properties
  
 diff --git a/src/Content/ContentReaders/EnumReader.cs b/src/Content/ContentReaders/EnumReader.cs
-index b06e014..c811601 100644
+index b06e014..6eb70e9 100644
 --- a/src/Content/ContentReaders/EnumReader.cs
 +++ b/src/Content/ContentReaders/EnumReader.cs
 @@ -13,7 +13,7 @@ using System;
@@ -213,7 +213,7 @@ index b06e014..c811601 100644
 +			Console.WriteLine(Enum.GetUnderlyingType(typeof(T)));
 +			
 +
-+			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.Structure.ShardNotes")) {
++			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.Structure.")) {
 +				Console.Error.WriteLine("deploying hacky workaround");
 +				return input.ReadRawObject<T>(new Int32Reader());
 +			}

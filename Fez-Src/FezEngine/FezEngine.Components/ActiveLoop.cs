@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FezEngine.Services;
 using FezEngine.Structure;
 using FezEngine.Tools;
-
+using Common;
 namespace FezEngine.Components
 {
 	internal class ActiveLoop
@@ -188,6 +188,7 @@ namespace FezEngine.Components
 
 		private void Play()
 		{
+			try {
 			if (!nextCuePrecached)
 			{
 				nextCue = SoundManager.GetCue(Loop.Name);
@@ -201,25 +202,39 @@ namespace FezEngine.Components
 			currentCue = nextCue;
 			barsToCount = Loop.Duration;
 			nextCuePrecached = false;
+			} catch (Exception e) {
+				Logger.Log("ActiveLoop", LogSeverity.Error, "Error playing loop");
+				Logger.LogError(e);
+			}
 		}
 
 		public void Dispose()
 		{
+			Logger.Log("ActiveLoop", "Disposing");
 			if (currentCue != null)
 			{
+				Logger.Log("ActiveLoop", "Stopping currentCue");
 				currentCue.Stop();
+				Logger.Log("ActiveLoop", "Disposing currentCue");
 				currentCue.Dispose();
+				Logger.Log("ActiveLoop", "Disposed currentCue");
 				currentCue = null;
 			}
+			Logger.Log("ActiveLoop", "Stopping strayCues");
 			nextCue.Stop();
+			Logger.Log("ActiveLoop", "Disposing nextCue");
 			nextCue.Dispose();
 			nextCue = null;
 			foreach (OggStream strayCue in strayCues)
 			{
+				Logger.Log("ActiveLoop", "Stopping strayCue" + strayCue);
 				strayCue.Stop();
+				Logger.Log("ActiveLoop", "Disposing strayCue" + strayCue);
 				strayCue.Dispose();
 			}
+			Logger.Log("ActiveLoop", "Clearing strayCues");
 			strayCues.Clear();
+			Logger.Log("ActiveLoop", "Disposed");
 			CycleLink = null;
 		}
 
