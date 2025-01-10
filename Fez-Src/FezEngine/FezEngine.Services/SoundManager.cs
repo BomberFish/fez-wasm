@@ -558,43 +558,43 @@ namespace FezEngine.Services
 
 		public void PlayNewSong(string name, bool interrupt)
 		{
-			if (!NoMusic)
-			{
-				TrackedSong currentlyPlayingSong = CurrentlyPlayingSong;
-				if (!interrupt)
-				{
-					ShelvedSong = ActiveSong;
-				}
-				else if (ActiveSong != null)
-				{
-					try {
-					ActiveSong.FadeOutAndRemoveComponent();
-					} catch (Exception e) {
-						Logger.Log("SoundManager", LogSeverity.Error, "Error in FadeOutAndRemoveComponent");
-						Logger.LogError(e);
-						try {
-							ServiceHelper.RemoveComponent(ActiveSong);
-						} catch(Exception e2) {
-							Logger.Log("SoundManager", LogSeverity.Error, "Error in RemoveComponent");
-							Logger.LogError(e2);
-						}
-					}
-				}
-				if (string.IsNullOrEmpty(name))
-				{
-					ActiveSong = null;
-				}
-				else
-				{
-					TrackedSong trackedSong = CMProvider.CurrentLevel.Load<TrackedSong>("Music/" + name);
-					trackedSong.Initialize();
-					ServiceHelper.AddComponent(ActiveSong = new ActiveTrackedSong(base.Game, trackedSong, LevelManager.MutedLoops));
-				}
-				if (currentlyPlayingSong != CurrentlyPlayingSong)
-				{
-					this.SongChanged();
-				}
-			}
+			// if (!NoMusic)
+			// {
+			// 	TrackedSong currentlyPlayingSong = CurrentlyPlayingSong;
+			// 	if (!interrupt)
+			// 	{
+			// 		ShelvedSong = ActiveSong;
+			// 	}
+			// 	else if (ActiveSong != null)
+			// 	{
+			// 		try {
+			// 		ActiveSong.FadeOutAndRemoveComponent();
+			// 		} catch (Exception e) {
+			// 			Logger.Log("SoundManager", LogSeverity.Error, "Error in FadeOutAndRemoveComponent");
+			// 			Logger.LogError(e);
+			// 			try {
+			// 				ServiceHelper.RemoveComponent(ActiveSong);
+			// 			} catch(Exception e2) {
+			// 				Logger.Log("SoundManager", LogSeverity.Error, "Error in RemoveComponent");
+			// 				Logger.LogError(e2);
+			// 			}
+			// 		}
+			// 	}
+			// 	if (string.IsNullOrEmpty(name))
+			// 	{
+			// 		ActiveSong = null;
+			// 	}
+			// 	else
+			// 	{
+			// 		TrackedSong trackedSong = CMProvider.CurrentLevel.Load<TrackedSong>("Music/" + name);
+			// 		trackedSong.Initialize();
+			// 		ServiceHelper.AddComponent(ActiveSong = new ActiveTrackedSong(base.Game, trackedSong, LevelManager.MutedLoops));
+			// 	}
+			// 	if (currentlyPlayingSong != CurrentlyPlayingSong)
+			// 	{
+			// 		this.SongChanged();
+			// 	}
+			// }
 		}
 
 		public void PlayNewSong(string name, float fadeDuration)
@@ -608,43 +608,43 @@ namespace FezEngine.Services
 		public void PlayNewSong(string name, float fadeDuration, bool interrupt)
 		{
 			Logger.Log("SoundManager", "PlayNewSong: " + name);
-			if (!NoMusic)
-			{
-				TrackedSong currentlyPlayingSong = CurrentlyPlayingSong;
-				if (!interrupt)
-				{
-					ShelvedSong = ActiveSong;
-				}
-				else if (ActiveSong != null)
-				{
-					ActiveSong.FadeOutAndRemoveComponent(fadeDuration);
-				}
-				if (string.IsNullOrEmpty(name))
-				{
-					ActiveSong = null;
-				}
-				else
-				{
-					Logger.Log("SoundManager", "Loading song");
-					TrackedSong trackedSong = CMProvider.CurrentLevel.Load<TrackedSong>("Music/" + name);
-					Logger.Log("SoundManager", "Loaded song. Initializing.");
-					trackedSong.Initialize();
-					Logger.Log("SoundManager", "Adding component");
-					ServiceHelper.AddComponent(ActiveSong = new ActiveTrackedSong(base.Game, trackedSong, LevelManager.MutedLoops));
-					Logger.Log("SoundManager", "Song stuff is all done!");
+			// if (!NoMusic)
+			// {
+			// 	TrackedSong currentlyPlayingSong = CurrentlyPlayingSong;
+			// 	if (!interrupt)
+			// 	{
+			// 		ShelvedSong = ActiveSong;
+			// 	}
+			// 	else if (ActiveSong != null)
+			// 	{
+			// 		ActiveSong.FadeOutAndRemoveComponent(fadeDuration);
+			// 	}
+			// 	if (string.IsNullOrEmpty(name))
+			// 	{
+			// 		ActiveSong = null;
+			// 	}
+			// 	else
+			// 	{
+			// 		Logger.Log("SoundManager", "Loading song");
+			// 		TrackedSong trackedSong = CMProvider.CurrentLevel.Load<TrackedSong>("Music/" + name);
+			// 		Logger.Log("SoundManager", "Loaded song. Initializing.");
+			// 		trackedSong.Initialize();
+			// 		Logger.Log("SoundManager", "Adding component");
+			// 		ServiceHelper.AddComponent(ActiveSong = new ActiveTrackedSong(base.Game, trackedSong, LevelManager.MutedLoops));
+			// 		Logger.Log("SoundManager", "Song stuff is all done!");
 
-				}
+			// 	}
 
-				if (currentlyPlayingSong != CurrentlyPlayingSong)
-				{
-					try {
-						this.SongChanged();
-					} catch (Exception e) {
-						Logger.Log("SoundManager", LogSeverity.Error, "Error in SongChanged");
-						Logger.LogError(e);
-					}
-				}
-			}
+			// 	if (currentlyPlayingSong != CurrentlyPlayingSong)
+			// 	{
+			// 		try {
+			// 			this.SongChanged();
+			// 		} catch (Exception e) {
+			// 			Logger.Log("SoundManager", LogSeverity.Error, "Error in SongChanged");
+			// 			Logger.LogError(e);
+			// 		}
+			// 	}
+			// }
 		}
 
 		public void PlayNewAmbience()

@@ -6,11 +6,12 @@ Please don't kill me, Polytron.
 
 ## What works
 
-- The game starts up, displays developer credits, and gets to the title screen.
+- The game boots to the title screen, and you can start a new game.
 
 ## What doesn't work
 
-- The game crashes when attempting to go past the title screen.
+- Most audio is currently disabled due to library issues.
+- The game crashes when attempting to load the first level.
 
 ## Building
 
