@@ -1,0 +1,9 @@
+{
+	"files.associations": {
+		"*.ndjson": "jsonl",
+		"*.dbclient-js": "javascript",
+		"*.fsh": "glsl",
+		"*.vsh": "glsl",
+		"assert.h": "c"
+	}
+}

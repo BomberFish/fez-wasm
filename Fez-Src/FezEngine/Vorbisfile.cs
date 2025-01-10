@@ -65,11 +65,17 @@ public static class Vorbisfile
 
 	private const string nativeLibName = "libvorbisfile";
 
-	[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-	private static extern IntPtr malloc(IntPtr size);
+	// [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+	// private static extern IntPtr malloc(IntPtr size);
 
-	[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-	private static extern void free(IntPtr memblock);
+	// [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+	// private static extern void free(IntPtr memblock);
+
+	[DllImport("Emscripten")]
+	private static extern IntPtr wrap_malloc(IntPtr size);
+
+	[DllImport("Emscripten")]
+	private static extern void wrap_free(IntPtr memblock);
 
 	[DllImport("libvorbisfile", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ov_fopen")]
 	private static extern int INTERNAL_ov_fopen([In][MarshalAs(UnmanagedType.LPStr)] string path, IntPtr vf);
@@ -145,7 +151,7 @@ public static class Vorbisfile
 	public static int ov_clear(ref IntPtr vf)
 	{
 		int result = INTERNAL_ov_clear(vf);
-		free(vf);
+		wrap_free(vf);
 		vf = IntPtr.Zero;
 		return result;
 	}
@@ -167,14 +173,14 @@ public static class Vorbisfile
 		PlatformID platform = Environment.OSVersion.Platform;
 		if (IntPtr.Size == 4)
 		{
-			return malloc((IntPtr)720);
+			return wrap_malloc((IntPtr)720);
 		}
 		if (IntPtr.Size == 8)
 		{
 			return platform switch
 			{
-				PlatformID.Unix => malloc((IntPtr)944), 
-				PlatformID.Win32NT => malloc((IntPtr)840), 
+				PlatformID.Unix => wrap_malloc((IntPtr)944), 
+				PlatformID.Win32NT => wrap_malloc((IntPtr)840), 
 				_ => throw new NotSupportedException("Unhandled platform!"), 
 			};
 		}

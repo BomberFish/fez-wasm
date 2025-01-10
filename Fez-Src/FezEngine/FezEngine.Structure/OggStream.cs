@@ -208,13 +208,16 @@ namespace FezEngine.Structure
 			byte* destination = (byte*)ptr.ToPointer();
 			int val = nmemb.ToInt32() * size.ToInt32();
 			int num = Math.Min((int)(value.memoryStream.Length - value.streamOffset), val);
-			memcpy(destination, source, (IntPtr)num);
+			wrap_memcpy(destination, source, (IntPtr)num);
 			value.streamOffset += num;
 			return new IntPtr(num);
 		}
 
-		[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-		private unsafe static extern IntPtr memcpy(byte* destination, byte* source, IntPtr num);
+		// [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+		// private unsafe static extern IntPtr memcpy(byte* destination, byte* source, IntPtr num);
+
+		[DllImport("Emscripten")]
+		private unsafe static extern IntPtr wrap_memcpy(byte* destination, byte* source, IntPtr num);
 
 		private static int SeekCallback(IntPtr datasource, long offset, Vorbisfile.SeekWhence whence)
 		{
