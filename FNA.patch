@@ -68,23 +68,23 @@ index da3490e..d9a14b8 100644
  			}
  			if (disposed)
 diff --git a/src/Content/ContentReader.cs b/src/Content/ContentReader.cs
-index 11d9138..a737274 100644
+index 11d9138..eef680a 100644
 --- a/src/Content/ContentReader.cs
 +++ b/src/Content/ContentReader.cs
 @@ -139,11 +139,16 @@ namespace Microsoft.Xna.Framework.Content
  
  		public T ReadObject<T>()
  		{
-+			Console.WriteLine("Reading object of type " + typeof(T).Name);
++			// Console.WriteLine("Reading object of type " + typeof(T).Name);
  			return ReadObject(default(T));
  		}
  
  		public T ReadObject<T>(ContentTypeReader typeReader)
  		{
-+			Console.WriteLine("ReadObject: Reading object of type " + typeof(T).Name);
-+			Console.WriteLine("a");
-+			Console.WriteLine("ReadObject: Reading object with type reader " + typeReader);
-+			Console.WriteLine(typeReader == null);
++			// Console.WriteLine("ReadObject: Reading object of type " + typeof(T).Name);
++			// Console.WriteLine("a");
++			// Console.WriteLine("ReadObject: Reading object with type reader " + typeReader);
++			// Console.WriteLine(typeReader == null);
  			T result = (T) typeReader.Read(this, default(T));
  			RecordDisposable(result);
  			return result;
@@ -92,7 +92,7 @@ index 11d9138..a737274 100644
  
  		public T ReadObject<T>(T existingInstance)
  		{
-+			Console.WriteLine("Reading object of type " + typeof(T).Name);
++			// Console.WriteLine("Reading object of type " + typeof(T).Name);
  			return InnerReadObject(existingInstance);
  		}
  
@@ -124,7 +124,7 @@ index 11d9138..a737274 100644
  		}
  
 diff --git a/src/Content/ContentReaders/ArrayReader.cs b/src/Content/ContentReaders/ArrayReader.cs
-index e4762b7..ca184f5 100644
+index e4762b7..ed95e6e 100644
 --- a/src/Content/ContentReaders/ArrayReader.cs
 +++ b/src/Content/ContentReaders/ArrayReader.cs
 @@ -17,7 +17,7 @@ using System;
@@ -136,7 +136,7 @@ index e4762b7..ca184f5 100644
  	{
  		#region Private ContentTypeReader Instance
  
-@@ -47,15 +47,19 @@ namespace Microsoft.Xna.Framework.Content
+@@ -47,24 +47,40 @@ namespace Microsoft.Xna.Framework.Content
  
  		protected internal override T[] Read(ContentReader input, T[] existingInstance)
  		{
@@ -155,8 +155,18 @@ index e4762b7..ca184f5 100644
 +				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading value type array.");
  				for (uint i = 0; i < count; i += 1)
  				{
++					Console.WriteLine(i + "/" + count);
++					// if type is an enum
++					if (typeof(T).IsEnum)
++					{
++						Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading enum array.");
++						array[i] = input.ReadObject<T>(new EnumReader<T>());
++					}
++					else 
++					{
  					array[i] = input.ReadObject<T>(elementReader);
-@@ -63,8 +67,10 @@ namespace Microsoft.Xna.Framework.Content
++					}
+ 				}
  			}
  			else
  			{
@@ -181,7 +191,7 @@ index 8325826..2fd7ca1 100644
  		#region Public Properties
  
 diff --git a/src/Content/ContentReaders/EnumReader.cs b/src/Content/ContentReaders/EnumReader.cs
-index b06e014..1823924 100644
+index b06e014..c811601 100644
 --- a/src/Content/ContentReaders/EnumReader.cs
 +++ b/src/Content/ContentReaders/EnumReader.cs
 @@ -13,7 +13,7 @@ using System;
@@ -193,14 +203,27 @@ index b06e014..1823924 100644
  	{
  		#region Private ContentTypeReader Instance
  
-@@ -43,6 +43,7 @@ namespace Microsoft.Xna.Framework.Content
+@@ -43,7 +43,20 @@ namespace Microsoft.Xna.Framework.Content
  
  		protected internal override T Read(ContentReader input, T existingInstance)
  		{
-+			Console.WriteLine("EnumReader<T>.Read(ContentReader, T) called.");
++			Console.Error.WriteLine("EnumReader<"+typeof(T)+">.Read("+input+", "+typeof(T)+") called.");
++			// Console.WriteLine(typeof(T).AssemblyQualifiedName);
++			Console.WriteLine(elementReader);
++			Console.WriteLine(Enum.GetUnderlyingType(typeof(T)));
++			
++
++			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.Structure.ShardNotes")) {
++				Console.Error.WriteLine("deploying hacky workaround");
++				return input.ReadRawObject<T>(new Int32Reader());
++			}
++			// else 
++			// {
  			return input.ReadRawObject<T>(elementReader);
++			// }
  		}
  
+ 		#endregion
 diff --git a/src/Content/ContentReaders/ListReader.cs b/src/Content/ContentReaders/ListReader.cs
 index 3760786..eb586e7 100644
 --- a/src/Content/ContentReaders/ListReader.cs
@@ -236,19 +259,19 @@ index 2e1aa94..cbfa525 100644
  			}
  		}
 diff --git a/src/Content/ContentTypeReaderManager.cs b/src/Content/ContentTypeReaderManager.cs
-index ffa306e..180dde8 100644
+index ffa306e..a85f83c 100644
 --- a/src/Content/ContentTypeReaderManager.cs
 +++ b/src/Content/ContentTypeReaderManager.cs
 @@ -48,6 +48,8 @@ namespace Microsoft.Xna.Framework.Content
  		private static Dictionary<string, Func<ContentTypeReader>> typeCreators =
  			new Dictionary<string, Func<ContentTypeReader>>();
  
-+		private static Dictionary<String, Type> customTypes = new Dictionary<String, Type>();
++		public static Dictionary<String, Type> customTypes = new Dictionary<String, Type>();
 +
  		#endregion
  
  		#region Private Static Constructor
-@@ -71,6 +73,11 @@ namespace Microsoft.Xna.Framework.Content
+@@ -71,8 +73,14 @@ namespace Microsoft.Xna.Framework.Content
  
  		#region Public Methods
  
@@ -259,8 +282,11 @@ index ffa306e..180dde8 100644
 +
  		public ContentTypeReader GetTypeReader(Type targetType)
  		{
++			Console.WriteLine("Getting CTR of " + targetType.AssemblyQualifiedName);
  			ContentTypeReader reader;
-@@ -183,19 +190,62 @@ namespace Microsoft.Xna.Framework.Content
+ 			if (contentReaders.TryGetValue(targetType, out reader))
+ 			{
+@@ -183,19 +191,62 @@ namespace Microsoft.Xna.Framework.Content
  					 */
  					string originalReaderTypeString = reader.ReadString();
  

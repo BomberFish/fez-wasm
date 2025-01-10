@@ -184,7 +184,7 @@ namespace FezGame
 			ServiceHelper.InitializeServices();
 			ServiceHelper.InjectServices(this);
 			GameState.SaveData = new SaveData();
-			base.Window.Title = "FEZ";
+			// base.Window.Title = "FEZ";
 			if (SkipIntro)
 			{
 				LoadComponents(this);
