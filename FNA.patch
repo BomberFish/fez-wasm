@@ -191,7 +191,7 @@ index 8325826..2fd7ca1 100644
  		#region Public Properties
  
 diff --git a/src/Content/ContentReaders/EnumReader.cs b/src/Content/ContentReaders/EnumReader.cs
-index b06e014..6eb70e9 100644
+index b06e014..c448fd0 100644
 --- a/src/Content/ContentReaders/EnumReader.cs
 +++ b/src/Content/ContentReaders/EnumReader.cs
 @@ -13,7 +13,7 @@ using System;
@@ -213,7 +213,7 @@ index b06e014..6eb70e9 100644
 +			Console.WriteLine(Enum.GetUnderlyingType(typeof(T)));
 +			
 +
-+			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.Structure.")) {
++			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.")) {
 +				Console.Error.WriteLine("deploying hacky workaround");
 +				return input.ReadRawObject<T>(new Int32Reader());
 +			}
@@ -238,7 +238,7 @@ index 3760786..eb586e7 100644
  		#region Public Properties
  
 diff --git a/src/Content/ContentTypeReader.cs b/src/Content/ContentTypeReader.cs
-index 2e1aa94..cbfa525 100644
+index 2e1aa94..eccae69 100644
 --- a/src/Content/ContentTypeReader.cs
 +++ b/src/Content/ContentTypeReader.cs
 @@ -102,12 +102,16 @@ namespace Microsoft.Xna.Framework.Content
@@ -246,7 +246,7 @@ index 2e1aa94..cbfa525 100644
  		protected internal override object Read(ContentReader input, object existingInstance)
  		{
 +			Console.WriteLine("Reading object of type " + typeof(T).Name);
-+			Console.WriteLine("Read() " + input + existingInstance);
++			Console.WriteLine("Read() " + input + " - " +  existingInstance);
  			if (existingInstance == null)
  			{
 +				Console.WriteLine("Existing instance is null");
