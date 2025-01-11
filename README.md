@@ -12,6 +12,7 @@ Please don't kill me, Polytron.
 
 - Most audio is currently disabled due to library issues.
 - Loading the demo results in a mostly black screen, with only the Dot visible.
+- Loading the full game's first level results in a crash.
 
 ## Building
 
