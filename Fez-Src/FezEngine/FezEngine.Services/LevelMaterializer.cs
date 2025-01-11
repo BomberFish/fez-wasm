@@ -7,6 +7,7 @@ using FezEngine.Structure.Geometry;
 using FezEngine.Tools;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Common;
 
 namespace FezEngine.Services
 {
@@ -531,6 +532,7 @@ namespace FezEngine.Services
 			case TrileUpdateAction.TwoFaceCullPartial:
 			case TrileUpdateAction.TwoFaceCullFull:
 			{
+				// Logger.Log("Culling", "TwoFaceCull");
 				Vector3 value = CameraManager.Viewpoint.SideMask();
 				BoundingFrustum frustum = CameraManager.Frustum;
 				Vector3 vector = CameraManager.View.Forward.Sign();
@@ -563,6 +565,10 @@ namespace FezEngine.Services
 			}
 			case TrileUpdateAction.TriFaceCull:
 			{
+				// Logger.Log("Culling", "TriFaceCull");
+				Logger.Log("Culling", CameraManager.ToString());
+				Logger.Log("Culling", CameraManager.View.ToString());
+				Logger.Log("Culling", CameraManager.View.Forward.ToString());
 				Vector3 vector4 = CameraManager.View.Forward.Sign();
 				FaceOrientation faceOrientation3 = FezMath.OrientationFromDirection(vector4.X * Vector3.UnitX);
 				FaceOrientation faceOrientation4 = FezMath.OrientationFromDirection((0f - vector4.Z) * Vector3.UnitZ);

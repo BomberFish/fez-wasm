@@ -25,14 +25,14 @@ namespace FezEngine.Components
 
 		public ActiveAmbienceTrack(AmbienceTrack track, bool activeForDayPhase)
 		{
-			ServiceHelper.InjectServices(this);
-			volume = 0f;
-			ActiveForDayPhase = activeForDayPhase;
-			OnMuteStateChanged();
-			Track = track;
-			cue = SoundManager.GetCue(Track.Name);
-			cue.Volume = volume;
-			cue.Play();
+			// ServiceHelper.InjectServices(this);
+			// volume = 0f;
+			// ActiveForDayPhase = activeForDayPhase;
+			// OnMuteStateChanged();
+			// Track = track;
+			// cue = SoundManager.GetCue(Track.Name);
+			// cue.Volume = volume;
+			// cue.Play();
 		}
 
 		public void Dispose()

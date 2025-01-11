@@ -68,7 +68,7 @@ index da3490e..d9a14b8 100644
  			}
  			if (disposed)
 diff --git a/src/Content/ContentReader.cs b/src/Content/ContentReader.cs
-index 11d9138..eef680a 100644
+index 11d9138..35fa04e 100644
 --- a/src/Content/ContentReader.cs
 +++ b/src/Content/ContentReader.cs
 @@ -139,11 +139,16 @@ namespace Microsoft.Xna.Framework.Content
@@ -100,12 +100,12 @@ index 11d9138..eef680a 100644
  
  		private T InnerReadObject<T>(T existingInstance)
  		{
-+			Console.WriteLine("Reading object of type " + typeof(T).Name);
++			// Console.WriteLine("Reading object of type " + typeof(T).Name);
  			int typeReaderIndex = Read7BitEncodedInt();
-+			Console.WriteLine("Past type reader index");
++			// Console.WriteLine("Past type reader index");
  			if (typeReaderIndex == 0)
  			{
-+				Console.WriteLine("Type reader index is 0");
++				// Console.WriteLine("Type reader index is 0");
  				return existingInstance;
  			}
  			if (typeReaderIndex > typeReaders.Length)
@@ -113,18 +113,18 @@ index 11d9138..eef680a 100644
  					"Incorrect type reader index found!"
  				);
  			}
-+			Console.WriteLine("Reading object with type reader index " + typeReaderIndex);
++			// Console.WriteLine("Reading object with type reader index " + typeReaderIndex);
  			ContentTypeReader typeReader = typeReaders[typeReaderIndex - 1];
-+			Console.WriteLine("Past type reader assignment");
++			// Console.WriteLine("Past type reader assignment");
  			T result = (T) typeReader.Read(this, default(T));
-+			Console.WriteLine("Past type reader read");
++			// Console.WriteLine("Past type reader read");
  			RecordDisposable(result);
-+			Console.WriteLine("Past disposable record");
++			// Console.WriteLine("Past disposable record");
  			return result;
  		}
  
 diff --git a/src/Content/ContentReaders/ArrayReader.cs b/src/Content/ContentReaders/ArrayReader.cs
-index e4762b7..ed95e6e 100644
+index e4762b7..15d519f 100644
 --- a/src/Content/ContentReaders/ArrayReader.cs
 +++ b/src/Content/ContentReaders/ArrayReader.cs
 @@ -17,7 +17,7 @@ using System;
@@ -136,49 +136,58 @@ index e4762b7..ed95e6e 100644
  	{
  		#region Private ContentTypeReader Instance
  
-@@ -47,24 +47,40 @@ namespace Microsoft.Xna.Framework.Content
+@@ -47,24 +47,48 @@ namespace Microsoft.Xna.Framework.Content
  
  		protected internal override T[] Read(ContentReader input, T[] existingInstance)
  		{
-+			Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) called.");
++			// Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) called.");
  			uint count = input.ReadUInt32();
  			T[] array = existingInstance;
  			if (array == null)
  			{
-+				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Allocating new array.");
++				// Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Allocating new array.");
  				array = new T[count];
-+				Console.WriteLine(array);
++				// Console.WriteLine(array);
  			}
  
  			if (typeof(T).IsValueType)
  			{
-+				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading value type array.");
++				// Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading value type array.");
  				for (uint i = 0; i < count; i += 1)
  				{
-+					Console.WriteLine(i + "/" + count);
-+					// if type is an enum
+-					array[i] = input.ReadObject<T>(elementReader);
++					// Console.WriteLine(i + "/" + count);
++
++					// PATCH EXPLANATION:
++					// For some reason, GetTypeReader is returning null for some types.
++					// I have no idea why this is happening, but it's causing a crash.
 +					if (typeof(T).IsEnum)
 +					{
-+						Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading enum array.");
++						Console.Error.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - doing jank workaround");
 +						array[i] = input.ReadObject<T>(new EnumReader<T>());
 +					}
 +					else 
 +					{
- 					array[i] = input.ReadObject<T>(elementReader);
++						if (elementReader == null) {
++							ContentTypeReader reader = ContentTypeReaderManager.customReaders[typeof(T)];
++							array[i] = input.ReadObject<T>(reader);
++						} else {
++							array[i] = input.ReadObject<T>(elementReader);
++						}
 +					}
  				}
  			}
  			else
  			{
-+				Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading reference type array.");
++				// Console.WriteLine("ArrayReader<T>.Read(ContentReader, T[]) - Reading reference type array.");
  				for (uint i = 0; i < count; i += 1)
  				{
-+					Console.WriteLine(i + "/" + count);
++					// Console.WriteLine(i + "/" + count);
  					int readerType = input.Read7BitEncodedInt();
  					if (readerType > 0)
  					{
 diff --git a/src/Content/ContentReaders/DictionaryReader.cs b/src/Content/ContentReaders/DictionaryReader.cs
-index 8325826..2fd7ca1 100644
+index 8325826..65f26a7 100644
 --- a/src/Content/ContentReaders/DictionaryReader.cs
 +++ b/src/Content/ContentReaders/DictionaryReader.cs
 @@ -14,7 +14,7 @@ using System.Collections.Generic;
@@ -190,8 +199,151 @@ index 8325826..2fd7ca1 100644
  	{
  		#region Public Properties
  
+@@ -62,41 +62,142 @@ namespace Microsoft.Xna.Framework.Content
+ 
+ 		protected internal override Dictionary<TKey, TValue> Read(ContentReader input, Dictionary<TKey, TValue> existingInstance)
+ 		{
++			// Console.Error.WriteLine("DictionaryReader<"+typeof(TKey)+", "+typeof(TValue)+">.Read("+input+", "+typeof(Dictionary<TKey, TValue>)+") called.");
+ 			int count = input.ReadInt32();
++			// Console.WriteLine(count);
+ 			Dictionary<TKey, TValue> dictionary = existingInstance;
++			// Console.WriteLine(dictionary);
+ 			if (dictionary == null)
+ 			{
++				// Console.WriteLine("dictionary is null");
+ 				dictionary = new Dictionary<TKey, TValue>(count);
++				// Console.WriteLine(dictionary);
+ 			}
+ 			else
+ 			{
++				// Console.WriteLine("dictionary is not null");
+ 				dictionary.Clear();
++				// Console.WriteLine(dictionary);
+ 			}
+ 
+ 			for (int i = 0; i < count; i += 1)
+ 			{
++				// Console.WriteLine("Reading entry #" + i);
++
++				// Console.WriteLine(typeof(TKey));
++				// Console.WriteLine(typeof(TKey).AssemblyQualifiedName);
++				// Console.WriteLine(typeof(TValue));
++				// Console.WriteLine(typeof(TValue).AssemblyQualifiedName);
++
++				// Console.WriteLine(keyType);
++				// Console.WriteLine(valueType);
++
++				if (keyType == null)
++				{
++					keyType = typeof(TKey);
++				}
++
++				if (valueType == null)
++				{
++					valueType = typeof(TValue);
++				}
++
++				// Console.WriteLine(keyType);
++				// Console.WriteLine(valueType);
++
++				// Console.WriteLine(keyReader);
++				// Console.WriteLine(valueReader);
++
++
++				// PATCH EXPLANATION:
++				// Some jank occurs in WASM where the keyReader and valueReader are null
++				// So we have some static readers set in the ContentTypeReaderManager
++				// See ContentTypeReaderManager.cs for more info
++				try {
++					if (keyReader == null)
++					{
++						keyReader = ContentTypeReaderManager.customReaders[keyType];
++					}
++				} catch (Exception) {
++					if (keyType == typeof(Int32))
++					{
++						keyReader = new Int32Reader();
++					} 
++					else if (keyType == typeof(String))
++					{
++						keyReader = new StringReader();
++					}
++					else if (keyType.IsEnum)
++					{
++						keyReader = new EnumReader<TKey>();
++					}
++					else if (keyType.IsArray)
++					{
++						keyReader = new ArrayReader<TKey>();
++					}
++				}
++
++				try {
++					if (valueReader == null)
++					{
++						valueReader = ContentTypeReaderManager.customReaders[valueType];
++					}
++				} catch (Exception) {
++					if (valueType == typeof(Int32))
++					{
++						valueReader = new Int32Reader();
++					} 
++					else if (valueType == typeof(String))
++					{
++						valueReader = new StringReader();
++					}
++					else if (valueType.IsEnum)
++					{
++						valueReader = new EnumReader<TValue>();
++					}
++					else if (valueType.IsArray)
++					{
++						valueReader = new ArrayReader<TValue>();
++					}
++				}
++
++				// Console.WriteLine("keyReader: " + keyReader);
++				// Console.WriteLine("valueReader: " + valueReader);
++
+ 				TKey key;
+ 				TValue value;
++
+ 				if (keyType.IsValueType)
+ 				{
++					// Console.WriteLine("keyType is ValueType");
+ 					key = input.ReadObject<TKey>(keyReader);
++					// Console.WriteLine(key);
+ 				}
+ 				else
+ 				{
++					// Console.WriteLine("keyType is not ValueType");
+ 					int readerType = input.Read7BitEncodedInt();
+ 					key = (readerType > 0) ? input.ReadObject<TKey>(input.TypeReaders[readerType - 1]) : default(TKey);
++					// Console.WriteLine(key);
+ 				}
++
+ 				if (valueType.IsValueType)
+ 				{
++					// Console.WriteLine("valueType is ValueType");
+ 					value = input.ReadObject<TValue>(valueReader);
++					// Console.WriteLine(value);
+ 				}
+ 				else
+ 				{
++					// Console.WriteLine("valueType is not ValueType");
+ 					int readerType = input.Read7BitEncodedInt();
+ 					value = (readerType > 0) ? input.ReadObject<TValue>(input.TypeReaders[readerType - 1]) : default(TValue);
++					// Console.WriteLine(value);
+ 				}
++				// Console.WriteLine("Adding key and value to dictionary");
+ 				dictionary.Add(key, value);
+ 			}
++			// Console.WriteLine("Returning dictionary");
+ 			return dictionary;
+ 		}
+ 
 diff --git a/src/Content/ContentReaders/EnumReader.cs b/src/Content/ContentReaders/EnumReader.cs
-index b06e014..c448fd0 100644
+index b06e014..fe3e5d7 100644
 --- a/src/Content/ContentReaders/EnumReader.cs
 +++ b/src/Content/ContentReaders/EnumReader.cs
 @@ -13,7 +13,7 @@ using System;
@@ -203,17 +355,20 @@ index b06e014..c448fd0 100644
  	{
  		#region Private ContentTypeReader Instance
  
-@@ -43,7 +43,20 @@ namespace Microsoft.Xna.Framework.Content
+@@ -43,7 +43,23 @@ namespace Microsoft.Xna.Framework.Content
  
  		protected internal override T Read(ContentReader input, T existingInstance)
  		{
-+			Console.Error.WriteLine("EnumReader<"+typeof(T)+">.Read("+input+", "+typeof(T)+") called.");
++			// Console.Error.WriteLine("EnumReader<"+typeof(T)+">.Read("+input+", "+typeof(T)+") called.");
 +			// Console.WriteLine(typeof(T).AssemblyQualifiedName);
-+			Console.WriteLine(elementReader);
-+			Console.WriteLine(Enum.GetUnderlyingType(typeof(T)));
++			// Console.WriteLine(elementReader);
++			// Console.WriteLine(Enum.GetUnderlyingType(typeof(T)));
 +			
 +
 +			if (elementReader == null && typeof(T).AssemblyQualifiedName.StartsWith("FezEngine.")) {
++				// PATCH EXPLANATION:
++				// in fez, every enum just so happens to be an int
++				// so, we just read it as an int
 +				Console.Error.WriteLine("deploying hacky workaround");
 +				return input.ReadRawObject<T>(new Int32Reader());
 +			}
@@ -238,55 +393,85 @@ index 3760786..eb586e7 100644
  		#region Public Properties
  
 diff --git a/src/Content/ContentTypeReader.cs b/src/Content/ContentTypeReader.cs
-index 2e1aa94..eccae69 100644
+index 2e1aa94..0177bba 100644
 --- a/src/Content/ContentTypeReader.cs
 +++ b/src/Content/ContentTypeReader.cs
 @@ -102,12 +102,16 @@ namespace Microsoft.Xna.Framework.Content
  		/// </param>
  		protected internal override object Read(ContentReader input, object existingInstance)
  		{
-+			Console.WriteLine("Reading object of type " + typeof(T).Name);
-+			Console.WriteLine("Read() " + input + " - " +  existingInstance);
++			// Console.WriteLine("Reading object of type " + typeof(T).Name);
++			// Console.WriteLine("Read() " + input + " - " +  existingInstance);
  			if (existingInstance == null)
  			{
-+				Console.WriteLine("Existing instance is null");
++				// Console.WriteLine("Existing instance is null");
  				return this.Read(input, default(T));
  			}
  			else
  			{
-+				Console.WriteLine("Existing instance is not null");
++				// Console.WriteLine("Existing instance is not null");
  				return this.Read(input, (T) existingInstance);
  			}
  		}
 diff --git a/src/Content/ContentTypeReaderManager.cs b/src/Content/ContentTypeReaderManager.cs
-index ffa306e..a85f83c 100644
+index ffa306e..3fd960f 100644
 --- a/src/Content/ContentTypeReaderManager.cs
 +++ b/src/Content/ContentTypeReaderManager.cs
-@@ -48,6 +48,8 @@ namespace Microsoft.Xna.Framework.Content
+@@ -25,7 +25,7 @@ namespace Microsoft.Xna.Framework.Content
+ 	{
+ 		#region Private Variables
+ 
+-		private Dictionary<Type, ContentTypeReader> contentReaders;
++		public Dictionary<Type, ContentTypeReader> contentReaders;
+ 
+ 		#endregion
+ 
+@@ -48,6 +48,9 @@ namespace Microsoft.Xna.Framework.Content
  		private static Dictionary<string, Func<ContentTypeReader>> typeCreators =
  			new Dictionary<string, Func<ContentTypeReader>>();
  
 +		public static Dictionary<String, Type> customTypes = new Dictionary<String, Type>();
++		public static Dictionary<Type, ContentTypeReader> customReaders = new Dictionary<Type, ContentTypeReader>();
 +
  		#endregion
  
  		#region Private Static Constructor
-@@ -71,8 +73,14 @@ namespace Microsoft.Xna.Framework.Content
+@@ -71,12 +74,34 @@ namespace Microsoft.Xna.Framework.Content
  
  		#region Public Methods
  
-+		public static void AddCustomTypeReader(string readerTypeString, Type readerType)
++		// PATCH EXPLANATION: 
++		// This method is used to add custom types to the ContentTypeReaderManager.
++		// This is used to add custom types that are not part of the Microsoft.Xna.Framework assembly.
++		// It's a workaround for some WASM jank.
++		public static void AddCustomType(string readerTypeString, Type readerType)
 +		{
 +			customTypes.Add(readerTypeString, readerType);
 +		}
 +
++		// PATCH EXPLANATION:
++		// Similar to the above, this method is used to add custom readers to the ContentTypeReaderManager,
++		// that correspond to types outside of the Microsoft.Xna.Framework assembly.
++		public static void AddCustomReader(Type readerType, ContentTypeReader reader)
++		{
++			customReaders.Add(readerType, reader);
++		}
++
  		public ContentTypeReader GetTypeReader(Type targetType)
  		{
-+			Console.WriteLine("Getting CTR of " + targetType.AssemblyQualifiedName);
++			// Console.WriteLine("Getting CTR of " + targetType.AssemblyQualifiedName);
  			ContentTypeReader reader;
  			if (contentReaders.TryGetValue(targetType, out reader))
  			{
-@@ -183,19 +191,62 @@ namespace Microsoft.Xna.Framework.Content
+ 				return reader;
++			} else if (customReaders.TryGetValue(targetType, out reader))
++			{
++				// Console.WriteLine("Custom Reader Type: " + targetType.AssemblyQualifiedName);
++				return reader;
+ 			}
+ 
+ 			/* If you got here, you're in a really nasty spot...
+@@ -183,19 +208,123 @@ namespace Microsoft.Xna.Framework.Content
  					 */
  					string originalReaderTypeString = reader.ReadString();
  
@@ -302,6 +487,7 @@ index ffa306e..a85f83c 100644
  					}
 +					else if (customTypes.TryGetValue(readerTypeString, out Type customType))
 +					{
++						// Console.WriteLine("Custom Reader Type: " + readerTypeString);
 +						newReaders[i] = customType.GetDefaultConstructor().Invoke(null) as ContentTypeReader;
 +					}
  					else
@@ -310,8 +496,8 @@ index ffa306e..a85f83c 100644
 -						string readerTypeString = originalReaderTypeString;
 -						readerTypeString = PrepareType(readerTypeString);
 -
-+						Console.WriteLine("Original Reader Type: " + originalReaderTypeString);
-+						Console.WriteLine("Reader Type: " + readerTypeString);
++						// Console.WriteLine("Original Reader Type: " + originalReaderTypeString);
++						// Console.WriteLine("Reader Type: " + readerTypeString);
  						Type l_readerType = Type.GetType(readerTypeString);
 +						if (l_readerType == null)
 +						{
@@ -348,6 +534,66 @@ index ffa306e..a85f83c 100644
 +							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Int32, mscorlib]]")
 +							{
 +								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Int32>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.UInt16, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.UInt16>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Single, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Single>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Byte, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Byte>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Int16, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Int16>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.UInt32, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.UInt32>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.UInt64, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.UInt64>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Int64, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Int64>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Double, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Double>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Boolean, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Boolean>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Decimal, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Decimal>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Char, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Char>);
++							}
++
++							if (readerTypeString == "Microsoft.Xna.Framework.Content.ArrayReader`1[[System.Object, mscorlib]]")
++							{
++								l_readerType = typeof(Microsoft.Xna.Framework.Content.ArrayReader<System.Object>);
 +							}
 +						}
  						if (l_readerType != null)

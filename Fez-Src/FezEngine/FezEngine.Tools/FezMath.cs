@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using FezEngine.Structure.Geometry;
 using Microsoft.Xna.Framework;
-
+using Common;
 namespace FezEngine.Tools
 {
 	public static class FezMath
@@ -870,6 +870,10 @@ namespace FezEngine.Tools
 
 		public static Vector3 Sign(this Vector3 vector)
 		{
+			// if (float.IsNaN(vector.X) || float.IsNaN(vector.Y) || float.IsNaN(vector.Z))
+			// {
+			// 	return Vector3.Zero;
+			// }
 			return new Vector3(Math.Sign(vector.X), Math.Sign(vector.Y), Math.Sign(vector.Z));
 		}
 

@@ -150,7 +150,7 @@ namespace FezGame.Services
 
 		public bool HideHUD { get; set; }
 
-		public bool IsTrialMode => false;
+		public bool IsTrialMode => true;
 
 		[ServiceDependency]
 		public IThreadPool ThreadPool { private get; set; }

@@ -6,12 +6,12 @@ Please don't kill me, Polytron.
 
 ## What works
 
-- The game boots to the title screen, and you can start a new game.
+- The game is able to load the demo level, however most graphics are not functional.
 
 ## What doesn't work
 
 - Most audio is currently disabled due to library issues.
-- The game crashes when attempting to load the first level.
+- Loading the demo results in a mostly black screen, with only the Dot visible.
 
 ## Building
 
