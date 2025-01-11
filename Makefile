@@ -1,14 +1,14 @@
-STATICS_RELEASE=ffcfbbc4-8e05-4875-9b77-cfce47e58a09
+STATICS_RELEASE=fd02fb07-06ae-4f1b-b6f7-a26b3bc3f93f
 # STATICS_RELEASE=latest
 
 CWD=$(shell pwd)
 
 statics: fna-clone
 	mkdir -p statics
-	@test -f statics/FAudio.a || wget -q --show-progress https://github.com/RedMike/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FAudio.a -O statics/FAudio.a
-	@test -f statics/FNA3D.a || wget -q --show-progress https://github.com/RedMike/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FNA3D.a -O statics/FNA3D.a
-	@test -f statics/libmojoshader.a || wget -q --show-progress https://github.com/RedMike/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/libmojoshader.a -O statics/libmojoshader.a
-	@test -f statics/SDL2.a || wget -q --show-progress https://github.com/RedMike/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/SDL2.a -O statics/SDL2.a
+	@test -f statics/FAudio.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FAudio.a -O statics/FAudio.a
+	@test -f statics/FNA3D.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FNA3D.a -O statics/FNA3D.a
+	@test -f statics/libmojoshader.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/libmojoshader.a -O statics/libmojoshader.a
+	@test -f statics/SDL2.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/SDL2.a -O statics/SDL2.a
 
 clean:
 	rm -rv statics obj bin || true
