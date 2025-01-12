@@ -1,14 +1,11 @@
-STATICS_RELEASE=fd02fb07-06ae-4f1b-b6f7-a26b3bc3f93f
-# STATICS_RELEASE=latest
-
 CWD=$(shell pwd)
 
 statics: fna-clone
 	mkdir -p statics
-	@test -f statics/FAudio.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FAudio.a -O statics/FAudio.a
-	@test -f statics/FNA3D.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/FNA3D.a -O statics/FNA3D.a
-	@test -f statics/libmojoshader.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/libmojoshader.a -O statics/libmojoshader.a
-	@test -f statics/SDL2.a || wget -q --show-progress https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/SDL2.a -O statics/SDL2.a
+	@test -f statics/FAudio.a || wget -q --show-progress https://github.com/MercuryWorkshop/celeste-wasm/raw/e353189f02c7eb5e32ab5c9a80eb89371c95da1e/FAudio.a -O statics/FAudio.a
+	@test -f statics/FNA3D.a || wget -q --show-progress https://github.com/MercuryWorkshop/celeste-wasm/raw/e353189f02c7eb5e32ab5c9a80eb89371c95da1e/FNA3D.a -O statics/FNA3D.a
+	@test -f statics/libmojoshader.a || wget -q --show-progress https://github.com/MercuryWorkshop/celeste-wasm/raw/e353189f02c7eb5e32ab5c9a80eb89371c95da1e/libmojoshader.a -O statics/libmojoshader.a
+	@test -f statics/SDL2.a || wget -q --show-progress https://github.com/MercuryWorkshop/celeste-wasm/raw/e353189f02c7eb5e32ab5c9a80eb89371c95da1e/SDL2.a -O statics/SDL2.a
 
 clean:
 	rm -rv statics obj bin || true
