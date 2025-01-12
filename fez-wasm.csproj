@@ -28,7 +28,7 @@
 		<!-- <WasmNativeDebugSymbols>false</WasmNativeDebugSymbols> -->
 		<WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
 
-		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -Wl,--no-check-features -sFULL_ES3 -lidbfs.js -sLZ4 -sMALLOC=emmalloc</EmccExtraLDFlags>
+		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wl,--no-check-features -sFULL_ES3 -lidbfs.js -sLZ4 -sMALLOC=emmalloc</EmccExtraLDFlags>
 		<!-- <EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag> -->
 		<!-- <EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag> -->
 		<EmccEnvironment>web,worker</EmccEnvironment>

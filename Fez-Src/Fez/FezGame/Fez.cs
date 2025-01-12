@@ -105,7 +105,7 @@ namespace FezGame
 			// }
 			deviceManager = new GraphicsDeviceManager(this);
 			SettingsManager.DeviceManager = deviceManager;
-			base.Content.RootDirectory = "Content";
+			base.Content.RootDirectory = "/Content";
 			ServiceHelper.Game = this;
 			ServiceHelper.IsFull = true;
 		}

@@ -56,7 +56,7 @@ namespace FezEngine.Services
 				DepthWrites = false,
 				AlwaysOnTop = true
 			};
-			fullscreenPlane.AddFace(Vector3.One * 2f, Vector3.Zero, FaceOrientation.Front, centeredOnOrigin: true);
+			fullscreenPlane.AddFace(Vector3.One * 2f, Vector3.Zero, FaceOrientation.Front, centeredOnOrigin: true, doublesided: true);
 		}
 
 		public void ScheduleHook(int drawOrder, RenderTarget2D rt)
@@ -294,7 +294,11 @@ namespace FezEngine.Services
 			{
 				fullscreenPlane.TextureMatrix.Set(textureMatrix.Value);
 			}
-			if (color != Color.White)
+			if (color == Color.White) {
+				fullscreenPlane.Material.Diffuse = Vector3.One;
+				fullscreenPlane.Material.Opacity = 1f;
+			}
+			else
 			{
 				fullscreenPlane.Material.Diffuse = color.ToVector3();
 				fullscreenPlane.Material.Opacity = (float)(int)color.A / 255f;
