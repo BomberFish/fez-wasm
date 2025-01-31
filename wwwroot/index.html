@@ -4,10 +4,22 @@
 		<title>Fez</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="darkreader-lock" content="true">
 		<script>
 			window.isNode = false;
 		</script>
 		<style>
+
+			body {
+				background-color: #212124;
+				color: #fff;
+				color-scheme: dark;
+				margin: 1em;
+			}
+
+			* {
+				font-family: system-ui, sans-serif;
+			}
 			canvas {
 				max-width: 100%;
 				background-color: #000;
@@ -16,8 +28,14 @@
 	</head>
 
 	<body>
+		<h2>fez-wasm</h2>
+		<p>An incomplete port of Fez to WebAssembly. Most graphics do not work, and the game is not playable.</p>
 		<button id="start">Start</button>
+		<br><br>
 		<canvas id="canvas"></canvas>
+		<p>FPS: <span id="fps">0</span></p>
+		<p>Note: Game assets need to be downloaded on first start (~375MB).</p>
+		<p>Check DevTools/Eruda for info.</p>
 	</body>
 	<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 	<script>eruda.init();</script>

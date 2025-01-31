@@ -63,12 +63,13 @@ const MainLoop = (cb) => {
 		let dt = now - ts;
 		ts = now;
 		fps = 1000 / dt;
-
 		cb();
+		document.getElementById("fps").innerText = fps.toFixed(2);
 	});
 };
 
 export async function startGame() {
+	document.getElementById("start").disabled = true;
 	if (!dotnet.instance.Module.FS.analyzePath("/Content").path) {
 		await new Promise(r => loadData(dotnet.instance.Module, r));
 		console.info("Loaded assets into VFS");
@@ -89,6 +90,8 @@ export async function startGame() {
 		if (!ret) {
 			console.debug("Cleanup...");
 			exports.Program.Cleanup();
+			console.debug("Done");
+			document.getElementById("start").disabled = false;
 			return;
 		}
 
